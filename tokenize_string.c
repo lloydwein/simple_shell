@@ -72,7 +72,7 @@ char *copy_token(char *src, int start, int end)
 	for (i = 0; i < length; i++)
 		token[i] = src[start + i];
 
-	token[length] - '\0';
+	token[length] = '\0';
 
 	return (token);
 }
@@ -94,18 +94,18 @@ char **tokenize_string(char *line, char *delimiter)
 
 	/* Count the number of tokens in the string */
 	if (numTokens == 0)
-		/* Return NULL if there are no tokens */
 		return (NULL);
 	/* Allocate memory for the array of tokens */
 	tokens = malloc(sizeof(char *) * (numTokens + 2));
 	if (!tokens)
-		/* Return NULL if memory allocation fails */
 		return (NULL);
 	tokenIndex = 0;
+	while (line[currentIndex])
 	{
 		/* Skip delimiter characters */
 		while (line[currentIndex] == *delimiter)
 			currentIndex++;
+
 		if (line[currentIndex])
 		{
 			start = currentIndex;
