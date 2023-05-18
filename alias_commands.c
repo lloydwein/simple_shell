@@ -78,40 +78,39 @@ void set_alias(char *alias_name, char *alias_value)
  */
 int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 {
-	alias_t *current_alias = aliases;
+	alias_t *alias_ptr = aliases;
 	int index, success = 0;
 	char *value;
 
 	if (!args[0])
 	{
-		while (current_alias)
+		while (alias_ptr)
 		{
-			print_alias(current_alias);
-			current_alias = current_alias->next;
+			print_alias(alias_ptr);
+			alias_ptr = alais_ptr->next;
 		}
 		return (success);
 	}
 	for (index = 0; args[index]; index++)
 	{
-		current_alias = aliases;
+		alias_ptr = aliases;
 		value = _strchr(args[index], '=');
 		if (!value)
 		{
-			while (current_alias)
+			while (alias_ptr)
 			{
-				if (_strcmp(args[index], current_alias->name)
-						== 0)
+				if (_strcmp(args[index], alias_ptr->name) == 0)
 				{
-					print_alias(current_alias);
+					print_alias(alias_ptr);
 					break;
 				}
-				current_alias = current_alias->next;
+				alias_ptr = alais_ptr->next;
 			}
-			if (!current_alias)
+			if (!alias_ptr)
 				success = create_error(args + index, 1);
 		}
 		else
-			set_alias(args[index], value);
+			set_alias(args[index], value + 1);
 	}
 	return (success);
 }
