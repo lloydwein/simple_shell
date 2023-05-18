@@ -85,6 +85,7 @@ int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 
 	if (!args[0])
 	{
+		alias_ptr = aliases;
 		while (alias_ptr)
 		{
 			print_alias(alias_ptr);
