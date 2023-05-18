@@ -87,7 +87,7 @@ int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 		while (alias_ptr)
 		{
 			print_alias(alias_ptr);
-			alias_ptr = alais_ptr->next;
+			alias_ptr = aliass_ptr->next;
 		}
 		return (success);
 	}
@@ -104,7 +104,7 @@ int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 					print_alias(alias_ptr);
 					break;
 				}
-				alias_ptr = alais_ptr->next;
+				alias_ptr = alias_ptr->next;
 			}
 			if (!alias_ptr)
 				success = create_error(args + index, 1);
