@@ -12,8 +12,8 @@ void print_alias(alias_t *alias)
 	char *alias_string;
 	int length;
 
-	alias_string = malloc(sizeof(char) * (length + 1));
 	length = _strlen(alias->name) + _strlen(alias->value) + 4;
+	alias_string = malloc(sizeof(char) * (length + 1));
 	if (!alias_string)
 		return;
 	_strcpy(alias_string, alias->name);
@@ -39,7 +39,6 @@ void set_alias(char *alias_name, char *alias_value)
 	int value_length, src_idx, dest_idx;
 	char *new_value;
 
-	*alias_value = '\0';
 	alias_value++;
 	value_length = _strlen(alias_value) - _strspn(alias_value, "'\"");
 	new_value = malloc(sizeof(char) * (value_length + 1));
@@ -69,7 +68,7 @@ void set_alias(char *alias_name, char *alias_value)
 /**
  * handle_alias_command - Handles alias commands in the shell
  * @args: The arguments passed to the command
- * @top: Unused parameter (for compatibility with shellby main function)
+ * @front: Unused parameter (for compatibility with shellby main function)
  * Description: This function handles alias commands in the shell. It prints
  * all aliases if no arguments are provided. If an argument matches an alias
  * name, it prints the corresponding alias. If an argument contains a "="
@@ -77,7 +76,7 @@ void set_alias(char *alias_name, char *alias_value)
  *
  * Return: 0 on success, -1 on error.
  */
-int handle_alias_command(char **args, char __attribute__((__unused__)) **top)
+int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 {
 	alias_t *current_alias = aliases;
 	int index, success = 0;
