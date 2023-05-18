@@ -78,7 +78,8 @@ void set_alias(char *alias_name, char *alias_value)
  */
 int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 {
-	alias_t *alias_ptr = aliases;
+	alias_t *alias_ptr;
+	alias_t *aliases = NULL;
 	int index, success = 0;
 	char *value;
 
@@ -87,7 +88,7 @@ int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 		while (alias_ptr)
 		{
 			print_alias(alias_ptr);
-			alias_ptr = aliass_ptr->next;
+			alias_ptr = alias_ptr->next;
 		}
 		return (success);
 	}
