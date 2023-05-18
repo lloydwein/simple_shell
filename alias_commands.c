@@ -109,7 +109,7 @@ int handle_alias_command(char **args, char __attribute__((__unused__)) **front)
 				alias_ptr = alias_ptr->next;
 			}
 			if (!alias_ptr)
-				success = create_error(args + index, 1);
+				success = create_error(args[index], 1);
 		}
 		else
 			set_alias(args[index], value + 1);
