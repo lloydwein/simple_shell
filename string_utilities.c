@@ -30,11 +30,12 @@ void _strcpy(char *source, char *dest)
 {
 	int index = 0;
 
-	for (; source[index] != '\0'; index++)
+	while (source[index] != '\0' && dest[index] != '\0')
 	{
 		dest[index] = source[index];
+		index++;
 	}
-	dest[index] = '\0';
+
+	if (dest[index] != '\0')
+		dest[index] = '\0';
 }
-
-
