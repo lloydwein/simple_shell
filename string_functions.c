@@ -1,119 +1,68 @@
-#include "main.h"
+#include "shell.h"
 
 /**
- * _strspn - Calculates the length of the initial segment of the string 'str'
- * that consists entirely of characters from the string 'ch'.
- * @str: The string to calculate the length of the initial segment.
- * @ch: The string containing characters to be considered for the initial
- * segment
- * Return: The length of the initial segment of 'str' consisting of characters
- * from ch
+ * tokenize_string - Tokenizes a string based on a delimiter
+ * @str_to_tokenize: The input string to be tokenized
+ * @delimiter: The delimiter used for tokenization
+ *
+ * Return: An array of tokens
  */
-int _strspn(char *str, char *ch)
+char **tokenize_string(char *str_to_tokenize, char *delimiter)
 {
-	/* Counter for the number of bytes in the initial segment */
-	int byte = 0;
-	int i;
+	int num_tokens = 0;
+	char **tokens = NULL;
+	char *curr_token = NULL;
+	char *save_parse = NULL;
 
-	/* Iterate through each character in 'str' */
-	while (*str)
+	curr_token = __strtok_r(str_to_tokenize, delimiter, &save_parse);
+
+	while (curr_token != NULL)
 	{
-		/* Iterate through each character in 'ch' */
-		for (i = 0; ch[i]; i++)
-		{
-			/*
-			 * If the current character in 'str' matches a character
-			 * in 'ch'
-			 */
-			if (*str == ch[i])
-			{
-				/* Increment the byte count */
-				byte++;
-				/* Exit the inner loop */
-				break;
-			}
-		}
-		/* Move to the next character in 'str' */
-		str++;
+		tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
+				(num_tokens + 1));
+		tokens[num_tokens] = curr_token;
+		curr_token = _strtok_r(NULL, delimiter, &save_parse);
+		num_tokens++;
 	}
-	/* Return the number of bytes in the initial segment */
-	return (byte);
+
+	tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
+			(num_tokens + 1));
+	tokens[num_tokens] = NULL;
+
+	return (tokens);
 }
 
 /**
- * _strcmp - Compares two strings and returns an integer value indicating
- * whether the first string is less than, equal to, or greater than the
- * second string.
- * @str1: The first string to compare.
- * @str2: The second string to compare.
- * Return: An integer value less than, equal to, or greater than zero,
- * indicating whether the first string is less than, equal to, or greater than
- * the second string.
+ * print_string - Prints a string to the specified stream
+ * @string_to_print: The string to be printed
+ * @output_stream: The stream to print the string to
+ *
+ * Return: void
  */
-int _strcmp(char *str1, char *str2)
+void print_string(char *string_to_print, int output_stream)
 {
-	/*
-	 * Compare each character of the two strings until either of them end or
-	 * they differ
-	 */
-	while (*str1 && *str2 && *str1 == *str2)
-	{
-		/* Move to the next character of the first string */
-		str1++;
-		/* Move to the next character of the second string */
-		str2++;
-	}
+	int index = 0;
 
-	/* If the two strings differ at some point */
-	if (*str1 != *str2)
-	{
-		/* Return the difference between the two differing character */
-		return (*str1 - *str2);
-	}
-
-	/* Return 0 if the two strings are identical */
-	return (0);
+	for (; string_to_print[index] != '\0'; index++)
+		write(output_stream, &string_to_print[index], 1);
 }
 
 /**
- * _strncmp - Compares at most 'n' characters of two strings and returns an
- * integer value indicating whether the first string is less than, equal to,
- * or greater than the second string.
- * @str1: The first string to compare.
- * @str2: The second string to compare.
- * @n: The maximum number of characters to compare.
- * Return: An integer value less than, equal to, or greater than zero,
- * indicating whether the first string is less than, equal to, or greater than
- * the second string.
+ * remove_newline - Removes the newline character from a string
+ * @str_to_modify: The string to modify
+ *
+ * Return: void
  */
-int _strncmp(const char *str1, const char *str2, size_t n)
+void remove_newline(char *str_to_modify)
 {
-	size_t i;
+	int index = 0;
 
-	/*
-	 * Compare each character of the two strings until either of them ends,
-	 * 'n' characters are compared, or they differ
-	 */
-	for (i = 0; str1[i] && str2[i] && i < n; i++)
+	while (str_to_modify[index] != '\0')
 	{
-		if (str1[i] > str2[i])
-		{
-			/* Return difference btw the two differing character */
-			return (str1[i] - str2[i]);
-		}
-		else if (str1[i] < str2[i])
-		{
-			/* Return difference btw the two differing character */
-			return (str1[i] - str2[i]);
-		}
+		if (str_to_modify[index] == '\n')
+			break;
+		index++;
 	}
-	/* If 'n' characters have been compared and no differences found */
-	if (i == n)
-	{
-		/* Return 0 to indicate equality */
-		return (0);
-	}
-	else
-		/* Return a non-zero value to indicate inequality */
-		return (-15);
+
+	str_to_modify[index] = '\0';
 }
