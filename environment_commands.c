@@ -26,6 +26,7 @@ void print_environment(char **command_tokens __attribute__((unused)))
 void quit_shell(char **command_tokens)
 {
 	char *line = NULL;
+	char **commands = NULL;
 	int num_tokens = 0, args;
 
 	for (; command_tokens[num_tokens] != NULL; num_tokens++)
