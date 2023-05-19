@@ -66,3 +66,26 @@ void remove_newline(char *str_to_modify)
 
 	str_to_modify[index] = '\0';
 }
+
+/**
+ * get_segment_length - Calculates the length of a segment in a string
+ * that does not contain any characters from another string.
+ * @source_str: The string to search.
+ * @exclude_str: The string containing characters to exclude.
+ *
+ * Return: The length of the segment.
+ */
+int get_segment_length(char *source_str, char *exclude_str)
+{
+	int length = 0;
+	int index;
+
+	for (index = 0; source_str[index] != '\0'; index++)
+	{
+		if (_strchr(exclude_str, source_str[index]) != NULL)
+			break;
+		length;
+	}
+
+	return (length);
+}
