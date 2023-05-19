@@ -14,7 +14,7 @@ char **tokenize_string(char *str_to_tokenize, char *delimiter)
 	char *curr_token = NULL;
 	char *save_parse = NULL;
 
-	curr_token = __strtok_r(str_to_tokenize, delimiter, &save_parse);
+	curr_token = _strtok_r(str_to_tokenize, delimiter, &save_parse);
 
 	while (curr_token != NULL)
 	{
