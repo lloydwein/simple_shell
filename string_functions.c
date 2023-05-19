@@ -89,3 +89,29 @@ int _get_segment_length(char *source_str, char *exclude_str)
 
 	return (length);
 }
+
+/**
+ * remove_comment - Removes comments from the input string
+ * @input: The input string to modify
+ *
+ * Description: This function removes comments from the input string by
+ * replacing the '#' character and everything after it with '\0'.
+ * It also removes comments preceded by a space character (' ').
+ * Return: void
+ */
+void remove_comment(char *input)
+{
+	int index = 0;
+
+	if (input[index] == '#')
+		input[index] = '\0';
+
+	while (input[index] != '\0')
+	{
+		if (input[index] == '#' && input[index - 1] == ' ')
+			break;
+		index++;
+	}
+
+	input[index] = '\0';
+}
