@@ -14,7 +14,6 @@ void non_interactive(void)
 	char **curr_cmd;
 	char *line = NULL;
 	size_t line_length = 0;
-	int status = 0;
 	int index, cmd_type = 0;
 
 	if (!(isatty(STDIN_FILENO)))

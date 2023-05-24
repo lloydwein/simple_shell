@@ -16,7 +16,6 @@
 void initializer(char **cmd, int cmd_type)
 {
 	pid_t child_pid;
-	int status;
 
 	if (cmd_type == EXTERNAL_COMMAND || cmd_type == PATH_COMMAND)
 	{
