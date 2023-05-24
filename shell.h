@@ -1,85 +1,137 @@
-#ifndef SHELL_H
-#define SHELL_H
+#ifndef _SHELL_H_
+#define _SHELL_H_
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <limits.h>
+#include <fcntl.h>
 #include <errno.h>
-#include <dirent.h>
-#include <signal.h>
 
+/* for read/write buffers */
+#define READ_BUF_SIZE 1024
+#define WRITE_BUF_SIZE 1024
+#define BUF_FLUSH -1
 
-/*constants*/
-#define EXTERNAL_COMMAND 1
-#define INTERNAL_COMMAND 2
-#define PATH_COMMAND 3
-#define INVALID_COMMAND -1
+/* for command chaining */
+#define CMD_NORM	0
+#define CMD_OR		1
+#define CMD_AND		2
+#define CMD_CHAIN	3
 
-#define min(x, y) (((x) < (y)) ? (x) : (y))
+/* for convert_number() */
+#define CONVERT_LOWERCASE	1
+#define CONVERT_UNSIGNED	2
 
-/**
- *struct map - a struct that maps a command name to a function
- *
- *@command_name: name of the command
- *@func: the function that executes the command
- */
+/* 1 if using system getline() */
+#define USE_GETLINE 0
+#define USE_STRTOK 0
 
-typedef struct map
-{
-	char *command_name;
-	void (*func)(char **command);
-} function_map;
+#define HIST_FILE	".simple_shell_history"
+#define HIST_MAX	4096
 
 extern char **environ;
-extern char *line;
-extern char **commands;
-extern char *shell_name;
-extern int status;
 
-/* BATCH COMMAND EXECUTOR */
-void non_interactive(void);
+
+/**
+ * struct liststr - singly linked list
+ * @num: the number field
+ * @str: a string
+ * @next: points to the next node
+ */
+typedef struct liststr
+{
+	int num;
+	char *str;
+	struct liststr *next;
+} list_t;
+
+/**
+ *struct passinfo - contains pseudo-arguements to pass into a function,
+ *		allowing uniform prototype for function pointer struct
+ *@arg: a string generated from getline containing arguements
+ *@argv: an array of strings generated from arg
+ *@path: a string path for the current command
+ *@argc: the argument count
+ *@line_count: the error count
+ *@err_num: the error code for exit()s
+ *@linecount_flag: if on count this line of input
+ *@fname: the program filename
+ *@env: linked list local copy of environ
+ *@environ: custom modified copy of environ from LL env
+ *@history: the history node
+ *@alias: the alias node
+ *@env_changed: on if environ was changed
+ *@status: the return status of the last exec'd command
+ *@cmd_buf: address of pointer to cmd_buf, on if chaining
+ *@cmd_buf_type: CMD_type ||, &&, ;
+ *@readfd: the fd from which to read line input
+ *@histcount: the history line number count
+ */
+typedef struct passinfo
+{
+	char *arg;
+	char **argv;
+	char *path;
+	int argc;
+	unsigned int line_count;
+	int err_num;
+	int linecount_flag;
+	char *fname;
+	list_t *env;
+	list_t *history;
+	list_t *alias;
+	char **environ;
+	int env_changed;
+	int status;
+
+	char **cmd_buf; /* pointer to cmd ; chain buffer, for memory mangement */
+	int cmd_buf_type; /* CMD_type ||, &&, ; */
+	int readfd;
+	int histcount;
+} info_t;
+
+#define INFO_INIT \
+{NULL, NULL, NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, \
+	0, 0, 0}
+
+/**
+ *struct builtin - contains a builtin string and related function
+ *@type: the builtin command flag
+ *@func: the function
+ */
+typedef struct builtin
+{
+	char *type;
+	int (*func)(info_t *);
+} builtin_table;
+
+/* ALIAS */
+int unset_alias(info_t *info, char *str);
+int set_alias(info_t *info, char *str);
+int print_alias(list_t *node);
+int _myalias(info_t *info);
 
 /* COMMAND EXECUTOR */
-void initializer(char **cmd, int cmd_type);
+
+/* COMMAND LOOP */
 
 /* DATA STRUCTURES */
-int _strlen(char *s);
-void _strcpy(char *source, char *dest);
-int _strcmp(char *s1, char *s2);
-char *_strcat(char *dest, char *src);
-unsigned int _strspn(char *s, char *accept);
 
 /* ENVIRONMENT COMMANDS */
-void print_environment(char **command_tokens __attribute__((unused)));
-void quit_shell(char **command_tokens);
+
+/* ENVIRONMENT UTILITIES */
+
+/* ERROR HANDLING */
+
+/* ERROR UTILITIES */
 
 /* FILE UTILITIES */
-char *_strchr(char *s, char c);
-char *_strtok_r(char *str_to_tokenize, char *delimiter, char **save_ptr);
-void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
-int _atoi(char *s);
-void ctrl_c_handler(int signum);
 
-/* MY SHELL */
-int main(int argc __attribute__((unused)), char **argv);
+/* FUNCTION IMPLEMENTATION */
 
-/* PATH RESOLUTIONS */
-char *_getenv(char *name);
-void (*get_func(char *command))(char **);
-char *check_path(char *command);
-void execute_command(char **tokenized_command, int command_type);
-int parse_command(char *command);
-
-/* STRING FUNCTIONS */
-int _get_segment_length(char *source_str, char *exclude_str);
-void remove_comment(char *input);
-void remove_newline(char *str_to_modify);
-void print_string(char *string_to_print, int output_stream);
-char **tokenizer(char *str_to_tokenize, char *delimiter);
-
-#endif
 
