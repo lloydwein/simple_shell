@@ -1,13 +1,13 @@
 #include "shell.h"
 
 /**
- * tokenize_string - Tokenizes a string based on a delimiter
+ * tokenizer - Tokenizes a string based on a delimiter
  * @str_to_tokenize: The input string to be tokenized
  * @delimiter: The delimiter used for tokenization
  *
  * Return: An array of tokens
  */
-char **tokenize_string(char *str_to_tokenize, char *delimiter)
+char **tokenizer(char *str_to_tokenize, char *delimiter)
 {
 	int num_tokens = 0;
 	char **tokens = NULL;
