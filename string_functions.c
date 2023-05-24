@@ -1,117 +1,74 @@
 #include "shell.h"
 
 /**
- * tokenizer - Tokenizes a string based on a delimiter
- * @str_to_tokenize: The input string to be tokenized
- * @delimiter: The delimiter used for tokenization
- *
- * Return: An array of tokens
+ **_strncpy - copies a string
+ *@dest: the destination string to be copied to
+ *@src: the source string
+ *@n: the amount of characters to be copied
+ *Return: the concatenated string
  */
-char **tokenizer(char *str_to_tokenize, char *delimiter)
+char *_strncpy(char *dest, char *src, int n)
 {
-	int num_tokens = 0;
-	char **tokens = NULL;
-	char *curr_token = NULL;
-	char *save_parse = NULL;
+	int i, j;
+	char *s = dest;
 
-	curr_token = _strtok_r(str_to_tokenize, delimiter, &save_parse);
-
-	while (curr_token != NULL)
+	i = 0;
+	while (src[i] != '\0' && i < n - 1)
 	{
-		tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
-				(num_tokens + 1));
-		tokens[num_tokens] = curr_token;
-		curr_token = _strtok_r(NULL, delimiter, &save_parse);
-		num_tokens++;
+		dest[i] = src[i];
+		i++;
 	}
-
-	tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
-			(num_tokens + 1));
-	tokens[num_tokens] = NULL;
-
-	return (tokens);
+	if (i < n)
+	{
+		j = i;
+		while (j < n)
+		{
+			dest[j] = '\0';
+			j++;
+		}
+	}
+	return (s);
 }
 
 /**
- * print_string - Prints a string to the specified stream
- * @string_to_print: The string to be printed
- * @output_stream: The stream to print the string to
- *
- * Return: void
+ **_strncat - concatenates two strings
+ *@dest: the first string
+ *@src: the second string
+ *@n: the amount of bytes to be maximally used
+ *Return: the concatenated string
  */
-void print_string(char *string_to_print, int output_stream)
+char *_strncat(char *dest, char *src, int n)
 {
-	int index = 0;
+	int i, j;
+	char *s = dest;
 
-	for (; string_to_print[index] != '\0'; index++)
-		write(output_stream, &string_to_print[index], 1);
+	i = 0;
+	j = 0;
+	while (dest[i] != '\0')
+		i++;
+	while (src[j] != '\0' && j < n)
+	{
+		dest[i] = src[j];
+		i++;
+		j++;
+	}
+	if (j < n)
+		dest[i] = '\0';
+	return (s);
 }
 
 /**
- * remove_newline - Removes the newline character from a string
- * @str_to_modify: The string to modify
- *
- * Return: void
+ **_strchr - locates a character in a string
+ *@s: the string to be parsed
+ *@c: the character to look for
+ *Return: (s) a pointer to the memory area s
  */
-void remove_newline(char *str_to_modify)
+char *_strchr(char *s, char c)
 {
-	int index = 0;
+	do {
+		if (*s == c)
+			return (s);
+	} while (*s++ != '\0');
 
-	while (str_to_modify[index] != '\0')
-	{
-		if (str_to_modify[index] == '\n')
-			break;
-		index++;
-	}
-
-	str_to_modify[index] = '\0';
-}
-
-/**
- * _get_segment_length - Calculates the length of a segment in a string
- * that does not contain any characters from another string.
- * @source_str: The string to search.
- * @exclude_str: The string containing characters to exclude.
- *
- * Return: The length of the segment.
- */
-int _get_segment_length(char *source_str, char *exclude_str)
-{
-	int length = 0;
-	int index;
-
-	for (index = 0; source_str[index] != '\0'; index++)
-	{
-		if (_strchr(exclude_str, source_str[index]) != NULL)
-			break;
-		length;
-	}
-
-	return (length);
-}
-
-/**
- * remove_comment - Removes comments from the input string
- * @input: The input string to modify
- *
- * Description: This function removes comments from the input string by
- * replacing the '#' character and everything after it with '\0'.
- * It also removes comments preceded by a space character (' ').
- * Return: void
- */
-void remove_comment(char *input)
-{
-	int index = 0;
-
-	if (input[index] == '#')
-		input[index] = '\0';
-
-	while (input[index] != '\0')
-	{
-		if (input[index] == '#' && input[index - 1] == ' ')
-			break;
-		index++;
-	}
-
-	input[index] = '\0';
+	return (NULL);
 }
