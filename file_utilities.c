@@ -18,7 +18,7 @@ char *_strchr(char *s, char c)
 	while (*string != c)
 	{
 		if (*string == 0)
-			return (0);
+			return (NULL);
 		string++;
 	}
 	return (string);
@@ -107,7 +107,7 @@ void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
 	memory = malloc(new_size);
 	if (memory == NULL)
 		return (0);
-	for (count = 0; count < (old_size || count < new_size); count++)
+	for (count = 0; count < old_size || count < new_size; count++)
 	{
 		*(memory + count) = pointer[count];
 	}

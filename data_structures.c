@@ -53,19 +53,22 @@ void _strcpy(char *source, char *dest)
 
 int _strcmp(char *s1, char *s2)
 {
-	int in = 0, a = 0;
+	int index = 0, diff = 0;
 
-	while (s1[a] != '\0' && s2[a] != '\0')
+	while (s1[index] != '\0' && s2[index] != '\0')
 	{
-		if (s1[a] != s2[a])
+		if (s1[index] != s2[index])
 		{
-			in = s1[a] - s2[a];
-			return (in);
+			diff = s1[index] - s2[index];
+			return (diff);
 		}
-		a++;
+		index++;
 	}
 
-	return (in);
+	if (s1[index] != '\0' || s2[index] != '\0')
+		diff = _strlen(s1) - _strlen(s2);
+
+	return (diff);
 }
 
 /**

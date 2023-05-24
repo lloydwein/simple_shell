@@ -12,8 +12,8 @@ void print_environment(char **command_tokens __attribute__((unused)))
 
 	for (index = 0; environ[index] != NULL; index++)
 	{
-		print_string(environ[index], STDOUT_FILENO);
-		print_string("\n", STDOUT_FILENO);
+		printf(environ[index], STDOUT_FILENO);
+		printf("\n", STDOUT_FILENO);
 	}
 }
 

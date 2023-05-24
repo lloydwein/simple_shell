@@ -18,8 +18,8 @@ char **tokenize_string(char *str_to_tokenize, char *delimiter)
 
 	while (curr_token != NULL)
 	{
-		tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
-				(num_tokens + 1));
+		tokens = _realloc(tokens, sizeof(*tokens) * num_tokens,
+				sizeof(*tokens) * (num_tokens + 1));
 		tokens[num_tokens] = curr_token;
 		curr_token = _strtok_r(NULL, delimiter, &save_parse);
 		num_tokens++;
@@ -44,7 +44,9 @@ void print_string(char *string_to_print, int output_stream)
 	int index = 0;
 
 	for (; string_to_print[index] != '\0'; index++)
-		write(output_stream, &string_to_print[index], 1);
+		write(output_stream, string_to_print,
+				_strlen(string_to_print));
+
 }
 
 /**
@@ -84,7 +86,7 @@ int _get_segment_length(char *source_str, char *exclude_str)
 	{
 		if (_strchr(exclude_str, source_str[index]) != NULL)
 			break;
-		length;
+		length++;
 	}
 
 	return (length);
