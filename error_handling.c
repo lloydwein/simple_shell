@@ -11,19 +11,19 @@
  */
 void remove_comment(char *input)
 {
-	int index = 0;
+	int ind = 0;
 
-	if (input[index] == '#')
-		input[index] = '\0';
+	if (input[ind] == '#')
+		input[ind] = '\0';
 
-	while (input[index] != '\0')
+	while (input[ind] != '\0')
 	{
-		if (input[index] == '#' && input[index - 1] == ' ')
+		if (ind > 0 && input[ind] == '#' && input[ind - 1] == ' ')
 			break;
-		index++;
+		ind++;
 	}
 
-	input[index] = '\0';
+	input[ind] = '\0';
 }
 
 /**

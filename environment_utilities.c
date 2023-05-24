@@ -82,6 +82,10 @@ int _setenv(info_t *info, char *var, char *value)
 			free(node->str);
 			node->str = buf;
 			info->env_changed = 1;
+
+			free_string_array(info->environ);
+			info->environ = list_to_strings(info->env);
+
 			return (0);
 		}
 		node = node->next;
@@ -89,5 +93,9 @@ int _setenv(info_t *info, char *var, char *value)
 	add_node_end(&(info->env), buf, 0);
 	free(buf);
 	info->env_changed = 1;
+
+	free_string_array(info->environ);
+	info->environ = list_to_strings(info->env);
+
 	return (0);
 }
