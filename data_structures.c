@@ -20,27 +20,6 @@ int _strlen(char *s)
 }
 
 /**
- * _strcpy - Copies the contents of source string to destination string
- * @source: The source string to be copied from
- * @dest: The destination string to copy to
- *
- * Return: void
- */
-void _strcpy(char *source, char *dest)
-{
-	int index = 0;
-
-	while (source[index] != '\0' && dest[index] != '\0')
-	{
-		dest[index] = source[index];
-		index++;
-	}
-
-	if (dest[index] != '\0')
-		dest[index] = '\0';
-}
-
-/**
  * _strcmp - compares two strings
  * Description: a function that compares the two strings s1 and s2
  * if Return value < 0 then it indicates str1 is less than str2
@@ -53,22 +32,34 @@ void _strcpy(char *source, char *dest)
 
 int _strcmp(char *s1, char *s2)
 {
-	int index = 0, diff = 0;
+	int in = 0, a = 0;
 
-	while (s1[index] != '\0' && s2[index] != '\0')
+	while (s1[a] != '\0' && s2[a] != '\0')
 	{
-		if (s1[index] != s2[index])
+		if (s1[a] != s2[a])
 		{
-			diff = s1[index] - s2[index];
-			return (diff);
+			in = s1[a] - s2[a];
+			return (in);
 		}
-		index++;
+		a++;
 	}
 
-	if (s1[index] != '\0' || s2[index] != '\0')
-		diff = _strlen(s1) - _strlen(s2);
+	return (in);
+}
 
-	return (diff);
+/**
+ * starts_with - checks if needle starts with haystack
+ * @haystack: string to search
+ * @needle: the substring to find
+ *
+ * Return: address of next char of haystack or NULL
+ */
+char *starts_with(const char *haystack, const char *needle)
+{
+	while (*needle)
+		if (*needle++ != *haystack++)
+			return (NULL);
+	return ((char *)haystack);
 }
 
 /**
@@ -92,38 +83,4 @@ char *_strcat(char *dest, char *src)
 		dest[b++] = src[a];
 
 	return (dest);
-}
-
-/**
- * _strspn - gets the length of a prefix substring
- * Description: a function that calculates the length of the initial segment of
- * s which consists entirely of characters in accept
- * @s: main C string to be scanned
- * @accept: string containing the list of characters to match in s
- * Return: number of characters in the initial segment of s which consist
- * only of characters from accept
- */
-
-unsigned int _strspn(char *s, char *accept)
-{
-	int string;
-	unsigned int counter = 0;
-
-	while (*s)
-	{
-		for (string = 0; accept[string]; string++)
-		{
-			if (*s == accept[string])
-			{
-				counter++;
-				break;
-			}
-			else if (accept[string + 1] == '\0')
-			{
-				return (counter);
-			}
-		}
-		s++;
-	}
-	return (counter);
 }

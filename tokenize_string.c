@@ -1,130 +1,94 @@
-#include "main.h"
+#include "shell.h"
 
 /**
- * get_token_length - Calculates the length of a token in a string until a
- * delimiter is encountered.
- * @str: The string to analyze.
- * @delimiter: The delimiter character.
- * Return: The length of the token until the delimiter is encountered.
+ * **strtow - splits a string into words. Repeat delimiters are ignored
+ * @str: the input string
+ * @d: the delimeter string
+ * Return: a pointer to an array of strings, or NULL on failure
  */
-int get_token_length(char *str, char *delimiter)
+
+char **strtow(char *str, char *d)
 {
-	/* Index ofr traversing the string */
-	int index = 0;
-	/* Lenth of the token */
-	int length = 0;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-	/* Loop until end of string or delimiter is found */
-	while (*(str + index) && *(str + index) != *delimiter)
+	if (str == NULL || str[0] == 0)
+		return (NULL);
+	if (!d)
+		d = " ";
+	for (i = 0; str[i] != '\0'; i++)
+		if (!is_delim(str[i], d) && (is_delim(str[i + 1], d) || !str[i + 1]))
+			numwords++;
+
+	if (numwords == 0)
+		return (NULL);
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
+		return (NULL);
+	for (i = 0, j = 0; j < numwords; j++)
 	{
-		/* Increment token length */
-		length++;
-		/* Move to the next character in the string */
-		index++;
-	}
-
-	/* Return the length of the token */
-	return (length);
-}
-
-/**
- * get_num_tokens - Count the number of tokens in a string based on a delimiter
- * @line: The string to be tokenized.
- * @delimiter: The delimiter character.
- * Return: The number of tokens.
- */
-int get_num_tokens(char *line, char *delimiter)
-{
-	int numTokens = 0;
-	int currentIndex = 0;
-
-	while (line[currentIndex])
-	{
-		while (line[currentIndex] == *delimiter)
-			currentIndex++;
-		if (line[currentIndex])
+		while (is_delim(str[i], d))
+			i++;
+		k = 0;
+		while (!is_delim(str[i + k], d) && str[i + k])
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
 		{
-			numTokens++;
-			currentIndex += get_token_length(line + currentIndex,
-					delimiter);
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
+			return (NULL);
 		}
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
 	}
-	return (numTokens);
+	s[j] = NULL;
+	return (s);
 }
 
 /**
- * copy_token - Copies a token from the source string to a new dynamically
- * allocated memory
- * @src: The source string containing the token.
- * @start: The starting index of the token.
- * @end: The ending index of the token.
- * Return: The dynamically allocated memory containing the token.
+ * **strtow2 - splits a string into words
+ * @str: the input string
+ * @d: the delimeter
+ * Return: a pointer to an array of strings, or NULL on failure
  */
-char *copy_token(char *src, int start, int end)
+char **strtow2(char *str, char d)
 {
-	int length = end - start;
-	char *token = malloc(sizeof(char) * (length + 1));
-	int i;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-	if (!token)
+	if (str == NULL || str[0] == 0)
 		return (NULL);
-
-	for (i = 0; i < length; i++)
-		token[i] = src[start + i];
-
-	token[length] = '\0';
-
-	return (token);
-}
-
-/**
- * tokenize_string - Tokenizes a string based on a delimiter and returns an
- * array of tokens
- * @line: The string to be tokenized.
- * @delimiter: The delimiter character
- * Return: An array of tokens (char**) or NULL if there are no tokens or if
- * memory allocation fails.
- */
-char **tokenize_string(char *line, char *delimiter)
-{
-	char **tokens;
-	int currentIndex = 0;
-	int numTokens = get_num_tokens(line, delimiter);
-	int tokenIndex, tokenLength, letterIndex, start, end;
-
-	/* Count the number of tokens in the string */
-	if (numTokens == 0)
+	for (i = 0; str[i] != '\0'; i++)
+		if ((str[i] != d && str[i + 1] == d) ||
+		    (str[i] != d && !str[i + 1]) || str[i + 1] == d)
+			numwords++;
+	if (numwords == 0)
 		return (NULL);
-	/* Allocate memory for the array of tokens */
-	tokens = malloc(sizeof(char *) * (numTokens + 2));
-	if (!tokens)
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
 		return (NULL);
-	tokenIndex = 0;
-	while (line[currentIndex])
+	for (i = 0, j = 0; j < numwords; j++)
 	{
-		/* Skip delimiter characters */
-		while (line[currentIndex] == *delimiter)
-			currentIndex++;
-
-		if (line[currentIndex])
+		while (str[i] == d && str[i] != d)
+			i++;
+		k = 0;
+		while (str[i + k] != d && str[i + k] && str[i + k] != d)
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
 		{
-			start = currentIndex;
-			end = start + get_token_length(line + currentIndex,
-					delimiter);
-			tokens[tokenIndex] = copy_token(line, start, end);
-			if (!tokens[tokenIndex])
-			{
-				for (letterIndex = tokenIndex - 1;
-						letterIndex >= 0; letterIndex--)
-					free(tokens[letterIndex]);
-				free(tokens);
-				return (NULL);
-			}
-			tokenIndex++;
-			currentIndex = end;
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
+			return (NULL);
 		}
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
 	}
-	/* Set the last element of the array to NULL to mark the end */
-	tokens[tokenIndex] = NULL;
-	return (tokens);
+	s[j] = NULL;
+	return (s);
 }

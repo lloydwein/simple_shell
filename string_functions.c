@@ -1,35 +1,26 @@
 #include "shell.h"
 
 /**
- * tokenize_string - Tokenizes a string based on a delimiter
- * @str_to_tokenize: The input string to be tokenized
- * @delimiter: The delimiter used for tokenization
- *
- * Return: An array of tokens
+ * *_strncpy - copies a string
+ * Description: a function that copies the string pointed to by src,
+ * including the terminating null byte ('\0'), to the buffer pointed to by dest
+ * @dest: pointer to the destination array where the content is to be copied
+ * @src: string to be copied
+ * @n: number of characters to be copied from source
+ * Return: pointer to the destination string dest
  */
-char **tokenize_string(char *str_to_tokenize, char *delimiter)
+
+char *_strncpy(char *dest, char *src, int n)
 {
-	int num_tokens = 0;
-	char **tokens = NULL;
-	char *curr_token = NULL;
-	char *save_parse = NULL;
+	int a;
 
-	curr_token = _strtok_r(str_to_tokenize, delimiter, &save_parse);
+	for (a = 0; a < n && src[a] != '\0'; a++)
+		dest[a] = src[a];
 
-	while (curr_token != NULL)
-	{
-		tokens = _realloc(tokens, sizeof(*tokens) * num_tokens,
-				sizeof(*tokens) * (num_tokens + 1));
-		tokens[num_tokens] = curr_token;
-		curr_token = _strtok_r(NULL, delimiter, &save_parse);
-		num_tokens++;
-	}
+	for (; a < n; a++)
+		dest[a] = '\0';
 
-	tokens = _realloc(tokens, sizeof(*tokens) * num_tokens, sizeof(*tokens) *
-			(num_tokens + 1));
-	tokens[num_tokens] = NULL;
-
-	return (tokens);
+	return (dest);
 }
 
 /**
@@ -50,70 +41,50 @@ void print_string(char *string_to_print, int output_stream)
 }
 
 /**
- * remove_newline - Removes the newline character from a string
- * @str_to_modify: The string to modify
- *
- * Return: void
+ * _strncat - concatenates two strings
+ * Description: a function similar to strcat except that
+ * it will use at most n bytes from src; and src does not need to be
+ * null-terminated if it contains n or more bytes
+ * As with strcat(), the resulting string in dest is always null-terminated
+ * @dest: string to append src to
+ * @src: the appending string
+ * @n: number of bytes
+ * Return: pointer to the resulting string dest
  */
-void remove_newline(char *str_to_modify)
+
+char *_strncat(char *dest, char *src, int n)
 {
-	int index = 0;
+	int a = 0, b = 0;
 
-	while (str_to_modify[index] != '\0')
-	{
-		if (str_to_modify[index] == '\n')
-			break;
-		index++;
-	}
+	while (dest[a++])
+		b++;
 
-	str_to_modify[index] = '\0';
+	for (a = 0; src[a] && a < n; a++)
+		dest[b++] = src[a];
+
+	return (dest);
 }
 
 /**
- * _get_segment_length - Calculates the length of a segment in a string
- * that does not contain any characters from another string.
- * @source_str: The string to search.
- * @exclude_str: The string containing characters to exclude.
- *
- * Return: The length of the segment.
+ * *_strchr -  locates a character in a string
+ * Description: a function that searches for the first occurrence of the
+ * character c (an unsigned char) in the string pointed to by the argument s
+ * @s: C string to be scanned
+ * @c: character to be searched in s
+ * Return: pointer to the first occurrence of the character c
+ * in the string s, or NULL if the character is not found
  */
-int _get_segment_length(char *source_str, char *exclude_str)
+
+char *_strchr(char *s, char c)
 {
-	int length = 0;
-	int index;
+	char *string;
 
-	for (index = 0; source_str[index] != '\0'; index++)
+	string = s;
+	while (*string != c)
 	{
-		if (_strchr(exclude_str, source_str[index]) != NULL)
-			break;
-		length++;
+		if (*string == 0)
+			return (0);
+		string++;
 	}
-
-	return (length);
-}
-
-/**
- * remove_comment - Removes comments from the input string
- * @input: The input string to modify
- *
- * Description: This function removes comments from the input string by
- * replacing the '#' character and everything after it with '\0'.
- * It also removes comments preceded by a space character (' ').
- * Return: void
- */
-void remove_comment(char *input)
-{
-	int index = 0;
-
-	if (input[index] == '#')
-		input[index] = '\0';
-
-	while (input[index] != '\0')
-	{
-		if (input[index] == '#' && input[index - 1] == ' ')
-			break;
-		index++;
-	}
-
-	input[index] = '\0';
+	return (string);
 }
