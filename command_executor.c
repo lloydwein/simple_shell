@@ -26,49 +26,37 @@ int is_delim(char c, char *delim)
 }
 
 /**
- *_isalpha - checks for alphabetic character
- *@c: The character to input
- *Return: 1 if c is alphabetic, 0 otherwise
+ * _isalpha - checks for alphabetic character
+ * @c: character to be checked
+ * Desription: a function
+ * Return: 1 if c is a letter, lowercase or uppercase, else 0
  */
 
 int _isalpha(int c)
 {
-	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-		return (1);
-	else
-		return (0);
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
 }
 
 /**
- *_atoi - converts a string to an integer
- *@s: the string to be converted
- *Return: 0 if no numbers in string, converted number otherwise
+ * _atoi - convert a string to an integer
+ * Description: a function
+ * @s: character to be checked
+ * Return: integer
  */
 
 int _atoi(char *s)
 {
-	int i, sign = 1, flag = 0, output;
-	unsigned int result = 0;
+	unsigned int num = 0;
+	int sign = 1;
 
-	for (i = 0;  s[i] != '\0' && flag != 2; i++)
-	{
-		if (s[i] == '-')
+	do {
+		if (*s == '-')
 			sign *= -1;
+		else if (*s >= '0' && *s <= '9')
+			num = (num * 10) + (*s - '0');
+		else if (num > 0)
+			break;
+	} while (*s++);
 
-		if (s[i] >= '0' && s[i] <= '9')
-		{
-			flag = 1;
-			result *= 10;
-			result += (s[i] - '0');
-		}
-		else if (flag == 1)
-			flag = 2;
-	}
-
-	if (sign == -1)
-		output = -result;
-	else
-		output = result;
-
-	return (output);
+	return (num * sign);
 }
