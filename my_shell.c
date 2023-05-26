@@ -41,7 +41,7 @@ int main(__attribute__((unused))int ac, char **av)
 				continue;
 			}
 			buf[bytes_read - 1] = '\0';
-			buf = input_san(buf, &buf_size);
+			buf = sanitize_input(buf, &buf_size);
 			if (buf_size == 0)
 			{
 				line_num++;
@@ -59,7 +59,7 @@ int main(__attribute__((unused))int ac, char **av)
 		else
 			is_separated = FALSE;
 
-		i = execute_commands(args);
+		i = command_manager(args);
 
 		free(args);
 
