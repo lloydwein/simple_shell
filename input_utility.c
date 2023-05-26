@@ -36,7 +36,7 @@ char *sanitize_input(char *old_buf, size_t *old_size)
 
 		if (*old_ptr == ';' || *old_ptr == '|' || *old_ptr == '&')
 		{
-			if (input_err_check(old_ptr) == FALSE)
+			if (validate_input(old_ptr) == FALSE)
 			{
 				*old_size = 0;
 				break;
@@ -199,10 +199,10 @@ char *replace_vars(char *arg)
 				tmp = _itoa(status);
 			else if (str_compare("$0", ptr, MATCH) == TRUE)
 				tmp = _strdup(shell_name);
-			else if (get_array_element(environ, ptr + 1) != NULL)
+			else if (findArrayElement(environ, ptr + 1) != NULL)
 			{
 				buffer = str_concat(ptr + 1, "=");
-				tmp = _strdup(get_array_element
+				tmp = _strdup(findArrayElement
 				(environ, buffer) + _strlen(buffer));
 				free(buffer);
 			}
