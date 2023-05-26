@@ -1,170 +1,242 @@
 #include "shell.h"
 
 /**
- * input_buf - buffers chained commands
- * @info: parameter struct
- * @buf: address of buffer
- * @len: address of len var
- *
- * Return: bytes read
+ * sanitize_input - Sanitizes the input string by replacing newline and tab
+ * characters with spaces, and removes leading and trailing spaces.
+ * Returns the sanitized input as a new dynamically allocated string
+ * @old_buf: input string to snitize
+ * @old_size: Pointer to the size of the input string.
+ * Return: The sanitized input string, or NULL if memory allocation fails
+ * or if the input is invalid.
  */
-ssize_t input_buf(info_t *info, char **buf, size_t *len)
+char *sanitize_input(char *old_buf, size_t *old_size)
 {
-	ssize_t r = 0;
-	size_t len_p = 0;
+	char *new_buf = malloc(*old_size * 3);
+	char *new_ptr = new_buf;
+	char *old_ptr = old_buf;
 
-	if (!*len) /* if nothing left in the buffer, fill it */
+	while (*old_ptr != '\0')
 	{
-		/*bfree((void **)info->cmd_buf);*/
-		free(*buf);
-		*buf = NULL;
-		signal(SIGINT, sigintHandler);
-#if USE_GETLINE
-		r = getline(buf, &len_p, stdin);
-#else
-		r = _getline(info, buf, &len_p);
-#endif
-		if (r > 0)
+		while (*old_ptr == ' ')
+			old_ptr++;
+		while (*old_ptr	!= ' ' && *old_ptr != ';' && *old_ptr != '|'
+		       && *old_ptr != '&' && *old_ptr != '\0')
 		{
-			if ((*buf)[r - 1] == '\n')
-			{
-				(*buf)[r - 1] = '\0'; /* remove trailing newline */
-				r--;
-			}
-			info->linecount_flag = 1;
-			remove_comments(*buf);
-			build_history_list(info, *buf, info->histcount++);
-			/* if (_strchr(*buf, ';')) is this a command chain? */
-			{
-				*len = r;
-				info->cmd_buf = buf;
-			}
+			*new_ptr = *old_ptr;
+			new_ptr++;
+			old_ptr++;
 		}
-	}
-	return (r);
-}
-
-/**
- * get_input - gets a line minus the newline
- * @info: parameter struct
- *
- * Return: bytes read
- */
-ssize_t get_input(info_t *info)
-{
-	static char *buf; /* the ';' command chain buffer */
-	static size_t i, j, len;
-	ssize_t r = 0;
-	char **buf_p = &(info->arg), *p;
-
-	_putchar(BUF_FLUSH);
-	r = input_buf(info, &buf, &len);
-	if (r == -1) /* EOF */
-		return (-1);
-	if (len)	/* we have commands left in the chain buffer */
-	{
-		j = i; /* init new iterator to current buf position */
-		p = buf + i; /* get pointer for return */
-
-		check_chain(info, buf, &j, i, len);
-		while (j < len) /* iterate to semicolon or end */
+		while (*old_ptr == ' ')
+			old_ptr++;
+		if (new_ptr != new_buf && *old_ptr != '\0')
 		{
-			if (is_chain(info, buf, &j))
+			*new_ptr = ' ';
+			new_ptr++;
+		}
+
+		if (*old_ptr == ';' || *old_ptr == '|' || *old_ptr == '&')
+		{
+			if (input_err_check(old_ptr) == FALSE)
+			{
+				*old_size = 0;
 				break;
-			j++;
+			}
+			*new_ptr = *old_ptr;
+			if (*old_ptr == ';')
+			{
+				new_ptr++;
+				*new_ptr = ' ';
+			}
+			else if (*(old_ptr + 1) == *old_ptr)
+			{
+				if (new_ptr == new_buf)
+				{
+					err_message(old_ptr, NULL);
+					*old_size = 0;
+					break;
+				}
+				new_ptr++;
+				*new_ptr = *old_ptr;
+				new_ptr++;
+				*new_ptr = ' ';
+				old_ptr++;
+			}
+			new_ptr++;
+			old_ptr++;
 		}
+	}
+	*new_ptr = '\0';
+	free(old_buf);
+	return (new_buf);
+}
 
-		i = j + 1; /* increment past nulled ';'' */
-		if (i >= len) /* reached end of buffer? */
-		{
-			i = len = 0; /* reset position and length */
-			info->cmd_buf_type = CMD_NORM;
-		}
+/**
+ * validate_input - Checks the input string for errors by validating its syntax
+ * It performs the following checks:
+ * - Checks if the input contains only whitespace characters.
+ * - Checks if the input ends with an incomplete escape character ('\').
+ * - Checks if the input ends with an incomplete quotation mark ('"').
+ * - Checks if the input ends with an incomplete single quotation mark ('\'').
+ * - Checks if the input contains mismatched quotation marks or escape
+ * characters.
+ * @ptr: the input string to check for errors
+ * Return: 1 if input is valid without any errors, 0 otherwise
+ */
+int validate_input(char *ptr)
+{
+	char *iter = ptr;
 
-		*buf_p = p; /* pass back pointer to current command position */
-		return (_strlen(p)); /* return length of current command */
+	iter++;
+	if (*ptr == ';' && *iter == *ptr)
+	{
+		err_message(ptr, NULL);
+		return (FALSE);
+	}
+	if (*iter == *ptr)
+		iter++;
+
+	while (*iter == ' ')
+		iter++;
+
+	if (*iter == ';' || *iter == '|' || *iter == '&')
+	{
+		err_message(iter, NULL);
+		return (FALSE);
 	}
 
-	*buf_p = buf; /* else not a chain, pass back buffer from _getline() */
-	return (r); /* return length of buffer from _getline() */
+	return (TRUE);
 }
 
 /**
- * read_buf - reads a buffer
- * @info: parameter struct
- * @buf: buffer
- * @i: size
- *
- * Return: r
- */
-ssize_t read_buf(info_t *info, char *buf, size_t *i)
+ * err_message - Prints an error message with the provided arguments.
+ * @arg0: The first argument.
+ * @arg1: The second argument.
+ * This function prints an error message to the standard error stream
+ * with the provided arguments. The error message includes the values
+ * of arg0 and arg1 to provide more context about the error.
+*/
+void err_message(char *arg0, char *arg1)
 {
-	ssize_t r = 0;
+	char *err_str_num = _itoa(line_num);
 
-	if (*i)
-		return (0);
-	r = read(info->readfd, buf, READ_BUF_SIZE);
-	if (r >= 0)
-		*i = r;
-	return (r);
+	write(STDERR_FILENO, shell_name, _strlen(shell_name));
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO, err_str_num, _strlen(err_str_num));
+	free(err_str_num);
+
+	if (str_compare("cd", arg0, MATCH) == TRUE)
+	{
+		status = 2;
+		write(STDERR_FILENO, ": cd: can't cd to ", 18);
+		write(STDERR_FILENO, arg1, _strlen(arg1));
+		write(STDERR_FILENO, "\n", 1);
+		return;
+	}
+
+	if (str_compare("exit", arg0, MATCH) == TRUE)
+	{
+		write(STDERR_FILENO, ": exit: Illegal number: ", 24);
+		write(STDERR_FILENO, arg1, _strlen(arg1));
+		write(STDERR_FILENO, "\n", 1);
+		return;
+	}
+	if (*arg0 == ';' || *arg0 == '|' || *arg0 == '&')
+	{
+		status = 2;
+		write(STDERR_FILENO, ": Syntax error: \"", 17);
+		write(STDERR_FILENO, arg0, 1);
+		if (*arg0 == *(arg0 + 1))
+			write(STDERR_FILENO, arg0, 1);
+		write(STDERR_FILENO, "\" unexpected\n", 14);
+		return;
+	}
+
+	status = 127;
+	write(STDERR_FILENO, ": ", 2);
+	write(STDERR_FILENO, arg0, _strlen(arg0));
+	write(STDERR_FILENO, ": not found\n", 12);
 }
 
 /**
- * _getline - gets the next line of input from STDIN
- * @info: parameter struct
- * @ptr: address of pointer to buffer, preallocated or NULL
- * @length: size of preallocated ptr buffer if not NULL
- *
- * Return: s
+ * replace_vars - Replaces environment variable references in a string.
+ * @arg: The string to process.
+ * Return: The modified string with replaced variable references.
  */
-int _getline(info_t *info, char **ptr, size_t *length)
+char *replace_vars(char *arg)
 {
-	static char buf[READ_BUF_SIZE];
-	static size_t i, len;
-	size_t k;
-	ssize_t r = 0, s = 0;
-	char *p = NULL, *new_p = NULL, *c;
+	char *clone = NULL;
+	char *ptr = arg;
+	char *next;
+	char *tmp;
+	char *buffer;
+	int is_var;
+	int i;
 
-	p = *ptr;
-	if (p && length)
-		s = *length;
-	if (i == len)
-		i = len = 0;
+	while (*ptr != '\0')
+	{
+		if (*ptr == '$')
+		{
+			if (clone == NULL)
+			{
+				clone = _strdup(arg);
+				i = ptr - arg;
+				ptr = clone + i;
+			}
+			next = ptr + 1;
+			while (*next != '\0' && *next != '$' && *next != '#')
+				next++;
 
-	r = read_buf(info, buf, &len);
-	if (r == -1 || (r == 0 && len == 0))
-		return (-1);
+			if (*next == '$' && next > ptr + 1)
+				is_var = TRUE;
+			else if (*next == '#')
+				is_var = NEITHER;
+			else
+				is_var = FALSE;
 
-	c = _strchr(buf + i, '\n');
-	k = c ? 1 + (unsigned int)(c - buf) : len;
-	new_p = _realloc(p, s, s ? s + k : k + 1);
-	if (!new_p) /* MALLOC FAILURE! */
-		return (p ? free(p), -1 : -1);
+			*next = '\0';
 
-	if (s)
-		_strncat(new_p, buf + i, k - i);
-	else
-		_strncpy(new_p, buf + i, k - i + 1);
+			if (str_compare("$?", ptr, MATCH) == TRUE)
+				tmp = _itoa(status);
+			else if (str_compare("$0", ptr, MATCH) == TRUE)
+				tmp = _strdup(shell_name);
+			else if (get_array_element(environ, ptr + 1) != NULL)
+			{
+				buffer = str_concat(ptr + 1, "=");
+				tmp = _strdup(get_array_element
+				(environ, buffer) + _strlen(buffer));
+				free(buffer);
+			}
+			else
+				tmp = _strdup("");
 
-	s += k - i;
-	i = k;
-	p = new_p;
+			*ptr = '\0';
+			ptr = str_concat(clone, tmp);
+			free(tmp);
+			if (is_var == FALSE)
+			{
+				free(clone);
+				clone = ptr;
+				break;
+			}
+			if (is_var == TRUE)
+				*next = '$';
+			else if (is_var == NEITHER)
+				*next = '#';
+			tmp = str_concat(ptr, next);
+			free(ptr);
+			ptr = tmp;
+			free(clone);
+			clone = ptr;
+			if (is_var == NEITHER)
+			{
+				while (*ptr != '#')
+					ptr++;
+			}
+		}
+		ptr++;
+	}
+	if (clone != NULL)
+		return (clone);
 
-	if (length)
-		*length = s;
-	*ptr = p;
-	return (s);
-}
-
-/**
- * sigintHandler - blocks ctrl-C
- * @sig_num: the signal number
- *
- * Return: void
- */
-void sigintHandler(__attribute__((unused))int sig_num)
-{
-	_puts("\n");
-	_puts("$ ");
-	_putchar(BUF_FLUSH);
+	return (arg);
 }

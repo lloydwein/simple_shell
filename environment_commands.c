@@ -1,92 +1,248 @@
 #include "shell.h"
 
 /**
- * _myenv - prints the current environment
- * @info: Structure containing potential arguments. Used to maintain
- *          constant function prototype.
- * Return: Always 0
- */
-int _myenv(info_t *info)
-{
-	print_list_str(info->env);
-	return (0);
-}
-
-/**
- * _getenv - gets the value of an environ variable
- * @info: Structure containing potential arguments. Used to maintain
- * @name: env var name
+ * _setEnvironmentVariable - Set an environment variable
+ * @name: The name of the environment variable
+ * @value: The value to assign to the environment variable
  *
- * Return: the value
+ * This function sets an environment variable with the provided name and value.
+ * If the value is NULL, an error message is displayed and the function return
+ * SKIP_FORK. It checks if the environment variable already exists, and if not
+ * it creates a new environment array with the updated variable.
+ * If the environment variable already exists, it replaces its value with the
+ * new value.
+ * Return: SKIP_FORK if successful, otherwise an error status code.
  */
-char *_getenv(info_t *info, const char *name)
+int _setEnvironmentVariable(const char *name, const char *value)
 {
-	list_t *node = info->env;
-	char *p;
+	char **newEnviron;
+	char *buffer;
+	char *bufferWithValue;
+	char *elementPtr;
+	int length;
 
-	while (node)
+	if (value == NULL)
 	{
-		p = starts_with(node->str, name);
-		if (p && *p)
-			return (p);
-		node = node->next;
+		write(STDERR_FILENO, "setenv: no value given\n", 23);
+		status = 2;
+		return (SKIP_FORK);
 	}
-	return (NULL);
+
+	buffer = str_concat((char *)name, "=");
+
+	elementPtr = get_array_element(environ, buffer);
+
+	bufferWithValue = str_concat(buffer, (char *)value);
+	free(buffer);
+	buffer = bufferWithValue;
+
+	if (elementPtr == NULL)
+	{
+		length = countListEntries(environ, NULL);
+		newEnviron = copyStringArray(environ, length + 1);
+		newEnviron[length - 1] = buffer;
+		newEnviron[length] = NULL;
+		freeStringArray(environ);
+		environ = newEnviron;
+		return (SKIP_FORK);
+	}
+
+	length = countListEntries(environ, (char *)name);
+	free(environ[length]);
+	environ[length] = buffer;
+
+	status = 0;
+
+	return (SKIP_FORK);
+}
+
+
+/**
+ * _unsetEnvironmentVariable - Unset an environment variable
+ * @name: The name of the environment variable to unset
+ *
+ * This function unsets an environment variable with the provided name.
+ * It searches for the variable in the environment array and removes it if
+ * found. If the variable is not found, an error message is displayed and
+ * the function returns SKIP_FORK.
+ * Return: SKIP_FORK if successful, otherwise an error status code.
+ */
+int _unsetEnvironmentVariable(const char *name)
+{
+	char **env_ptr;
+	char *buffer;
+	int index;
+
+	buffer = str_concat((char *)name, "=");
+	index = countListEntries(environ, buffer);
+	free(buffer);
+
+	if (index == -1)
+	{
+		write(STDERR_FILENO, "unsetenv: variable not found\n", 29);
+		status = 2;
+		return (SKIP_FORK);
+	}
+
+	env_ptr = environ + index;
+	free(*env_ptr);
+	while (*(env_ptr + 1) != NULL)
+	{
+		*env_ptr = *(env_ptr + 1);
+		env_ptr++;
+	}
+	*env_ptr = NULL;
+	status = 0;
+
+	return (SKIP_FORK);
 }
 
 /**
- * _mysetenv - Initialize a new environment variable,
- *             or modify an existing one
- * @info: Structure containing potential arguments. Used to maintain
- *        constant function prototype.
- *  Return: Always 0
+ * change_directory - Changes the current working directory to the specified
+ * directory
+ * @directory_name: the name of the directory to change to.
+ * If the directory name is NULL, it changes to the home directory.
+ * If the directory name is "-", it changes to the previous directory.
+ * If the directory name is a valid directory path, it changes to that
+ * directory
+ * Return: Returns 0 on success, -1 on failure.
  */
-int _mysetenv(info_t *info)
+int change_directory(char *directory_name)
 {
-	if (info->argc != 3)
-	{
-		_eputs("Incorrect number of arguements\n");
-		return (1);
-	}
-	if (_setenv(info, info->argv[1], info->argv[2]))
-		return (0);
-	return (1);
-}
+	char *home_dir;
+	char *prev_dir;
+	char old_path_buffer[PATH_MAX];
+	char new_path_buffer[PATH_MAX];
+	size_t buffer_size = PATH_MAX;
+	int status_code;
 
-/**
- * _myunsetenv - Remove an environment variable
- * @info: Structure containing potential arguments. Used to maintain
- *        constant function prototype.
- *  Return: Always 0
- */
-int _myunsetenv(info_t *info)
-{
-	int i;
+	getcwd(old_path_buffer, buffer_size);
 
-	if (info->argc == 1)
+	if (directory_name == NULL)
 	{
-		_eputs("Too few arguements.\n");
-		return (1);
+		home_dir = get_array_element(environ, "HOME=");
+		if (home_dir == NULL)
+		{
+			status = 2;
+			err_message("cd", directory_name);
+			return (-1);
+		}
+
+		home_dir += 5;
+
+		status_code = chdir((const char *)home_dir);
+		if (status_code != -1)
+			_setEnvironmentVariable("PWD",
+					(const char *)home_dir);
 	}
-	for (i = 1; i < info->argc; i++)
-		_unsetenv(info, info->argv[i]);
+	else if (str_compare("-", directory_name, MATCH) == TRUE)
+	{
+		prev_dir = get_array_element(environ, "OLDPWD=");
+		if (prev_dir == NULL)
+		{
+			status = 2;
+			err_message("cd", directory_name);
+			return (-1);
+		}
+
+		prev_dir += 7;
+
+		status_code = chdir((const char *)prev_dir);
+		if (status_code != -1)
+		{
+			write(STDOUT_FILENO, prev_dir, _strlen(prev_dir));
+			write(STDOUT_FILENO, "\n", 1);
+			_setEnvironmentVariable("PWD",
+					(const char *)prev_dir);
+		}
+	}
+	else if (directory_name != NULL)
+	{
+		status_code = chdir((const char *)directory_name);
+		if (status_code != -1)
+			_setEnvironmentVariable("PWD",
+					getcwd(new_path_buffer, buffer_size));
+	}
+	if (status_code == -1)
+	{
+		status = 2;
+		err_message("cd", directory_name);
+		return (-1);
+	}
+
+	status = 0;
+	_setEnvironmentVariable("OLDPWD", (const char *)old_path_buffer);
 
 	return (0);
 }
 
 /**
- * populate_env_list - populates env linked list
- * @info: Structure containing potential arguments. Used to maintain
- *          constant function prototype.
- * Return: Always 0
+ * handle_alias_command - Handles the 'alias' command.
+ * @args: the command argument
+ * @to_free: flag indicating whether to free the aliases
+ * Return: the staus of the command execution
  */
-int populate_env_list(info_t *info)
+int handle_alias_command(char **args, int to_free)
 {
-	list_t *node = NULL;
-	size_t i;
+	static Alias head = {NULL, NULL, NULL};
+	char *alias_value_ptr;
+	int is_error_free = TRUE;
 
-	for (i = 0; environ[i]; i++)
-		add_node_end(&node, environ[i], 0);
-	info->env = node;
-	return (0);
+	if (to_free == TRUE)
+		return (freeAliasList(head.next));
+
+	if (str_compare("alias", *args, MATCH) != TRUE)
+		return (checkIfAlias(args, head.next));
+
+	args++;
+
+	if (*args == NULL)
+		return (printAliases(head.next));
+
+	while (*args != NULL)
+	{
+		alias_value_ptr = *args;
+		while (*alias_value_ptr != '\0' && *alias_value_ptr != '=')
+			alias_value_ptr++;
+
+		if (*alias_value_ptr == '\0' || alias_value_ptr == *args)
+		{
+			if (printAliasValue(*args, &head) == FALSE)
+				is_error_free = FALSE;
+		}
+		else
+		{
+			*alias_value_ptr = '\0';
+			alias_value_ptr++;
+			setAliasValue(*args, &head, alias_value_ptr);
+			*(alias_value_ptr - 1) = '=';
+		}
+		args++;
+	}
+
+	if (is_error_free == FALSE)
+		return (SKIP_FORK);
+
+	status = 0;
+	return (SKIP_FORK);
+}
+
+/**
+ * print_environment - prints  the environment variables
+ * Return: the status of the command execution.
+ */
+int print_environment(void)
+{
+	char **env_ptr = environ;
+
+	while (*env_ptr != NULL)
+	{
+		write(STDOUT_FILENO, *env_ptr, _strlen(*env_ptr));
+		write(STDOUT_FILENO, "\n", 1);
+		env_ptr++;
+	}
+
+	status = 0;
+
+	return (SKIP_FORK);
 }

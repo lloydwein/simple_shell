@@ -20,67 +20,118 @@ int _strlen(char *s)
 }
 
 /**
- * _strcmp - compares two strings
- * Description: a function that compares the two strings s1 and s2
- * if Return value < 0 then it indicates str1 is less than str2
- * if Return value > 0 then it indicates str2 is less than str1
- * if Return value = 0 then it indicates str1 is equal to str2
- * @s1: first string to be compared
- * @s2: second string to be compared
- * Return: integer >0, <0 or =0
+ * *_strdup -  returns a pointer to a newly allocated space in memory
+ *  which contains a copy of the string given as a parameter
+ *  Description: a function that returns a pointer to a null-terminated byte
+ *  string which is a duplicate of the string pointed to by str.
+ *  The memory obtained is done dynamically using malloc and
+ *  hence it can be freed using free()
+ *
+ *  @str: pointer string
+ *  Return: pointer to the duplicated string str on success
+ *  Returns NULL if str = NULL, if insufficient memory was available
  */
 
-int _strcmp(char *s1, char *s2)
+char *_strdup(char *str)
 {
-	int in = 0, a = 0;
+	int len = _strlen(src);
+	char *dest = malloc(len + 1);
+	char *ptr;
 
-	while (s1[a] != '\0' && s2[a] != '\0')
+	if (src == NULL)
+		return (NULL);
+	if (dest == NULL)
+		exit(EXIT_FAILURE);
+
+	ptr = dest;
+
+	while (*src != '\0')
 	{
-		if (s1[a] != s2[a])
-		{
-			in = s1[a] - s2[a];
-			return (in);
-		}
-		a++;
+		*ptr = *src;
+		ptr++;
+		src++;
 	}
 
-	return (in);
-}
-
-/**
- * starts_with - checks if needle starts with haystack
- * @haystack: string to search
- * @needle: the substring to find
- *
- * Return: address of next char of haystack or NULL
- */
-char *starts_with(const char *haystack, const char *needle)
-{
-	while (*needle)
-		if (*needle++ != *haystack++)
-			return (NULL);
-	return ((char *)haystack);
-}
-
-/**
- * *_strcat - concatenates two strings
- * Description: a function that appends the src string to the dest string
- * overwriting the terminating null byte ('\0') at the end of dest
- * and then adds a terminating null byte
- * @dest: string to append src to
- * @src: the appending string
- * Return: pointer to the resulting string dest
- */
-
-char *_strcat(char *dest, char *src)
-{
-	int a = 0, b = 0;
-
-	while (dest[a++])
-		b++;
-
-	for (a = 0; src[a]; a++)
-		dest[b++] = src[a];
+	*ptr = '\0';
 
 	return (dest);
+}
+
+/**
+ * *str_concat - concatenates two strings
+ * Description: a function that concatenates the destination string and the
+ * source string and the result is stored in the destination string
+ * The returned pointer should point to a newly allocated space in memory which
+ * contains the contents of s1, followed by the contents of s2
+ * and null terminated
+ *
+ * @s1: pointer to the destination array, which should contain a C string
+ * and should be large enough to contain the concatenated resulting string.
+ * @s2: This is the string to be appended. This should not overlap the
+ * destination.
+ * Return: pointer to the resulting string s1
+ */
+
+char *str_concat(char *s1, char *s2)
+{
+	int len1 = (s1 != NULL) ? _strlen(s1) : 0;
+	int len2 = (s2 != NULL) ? _strlen(s2) : 0;
+	int len = len1 + len2;
+	char *dest = malloc(len + 1);
+	char *ptr = dest;
+
+	if (dest == NULL)
+	{
+		exit(EXIT_FAILURE);
+	}
+	if (s1 != NULL)
+	{
+		while (*s1 != '\0')
+		{
+			*ptr = *s1;
+			ptr++;
+			s1++;
+		}
+	}
+	if (s2 != NULL)
+	{
+		while (*s2 != '\0')
+		{
+			*ptr = *s2;
+			ptr++;
+			s2++;
+		}
+	}
+	*ptr = '\0';
+	return (dest);
+}
+
+/**
+ * str_compare - compare two string
+ * @s1: first string
+ * @s2: second string
+ * @pref_or_match: prefix
+ * Return: difference between strings
+ */
+int str_compare(char *s1, char *s2, int pref_or_match)
+{
+	if (s1 == NULL || s2 == NULL)
+		return (FALSE);
+
+	while (*s1 != '\0' && *s2 != '\0')
+	{
+		if (*s1 != *s2)
+			return (FALSE);
+
+		s1++;
+		s2++;
+	}
+
+	if (pref_or_match == PREFIX)
+		return (TRUE);
+
+	if (*s1 == *s2)
+		return (TRUE);
+
+	return (FALSE);
 }

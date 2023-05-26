@@ -49,9 +49,8 @@ int isAliasCommand(char **args, Alias *alias_list)
 /**
  * displayAliases - Display aliases
  * @alias_list: Pointer to the head of the alias list
- * 
  * This function prints the names and values of all aliases in the given alias
- * list 
+ * list
  * Return: SKIP_FORK
  */
 int displayAliases(Alias *alias_list)
@@ -108,11 +107,10 @@ int printAliasValue(char *arg, Alias *alias_ptr)
  * @aliasName: Alias name
  * @aliasList: Pointer to the head of the alias list
  * @newValue: New value to set for the alias
- * 
  * This function sets the value of the specified alias in the given alias list.
  * If the alias exists, its value is updated with the new value.
- * If the alias doesn't exist, a new alias is created with the specified name and value.
- * 
+ * If the alias doesn't exist, a new alias is created with the specified name
+ * and value.
  * Return: TRUE if the alias value is set successfully, FALSE otherwise
  */
 int setAliasValue(char *aliasName, Alias *aliasList, char *newValue)

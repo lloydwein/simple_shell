@@ -1,113 +1,95 @@
 #include "shell.h"
 
 /**
- * *_strcpy - copies the string pointed to by src, including the terminating
- * null byte (\0), to the buffer pointed to by dest
- * @src: string pointer
- * @dest: array
- * Description: a funcyion
- * Return: the pointer to dest
+ * _itoa - convets an integer to a string
+ * @n: integer to be converted
+ * Return: buf
  */
-
-char *_strcpy(char *dest, char *src)
+char *_itoa(int n)
 {
-	int a = 0;
-	int lng = 0;
+	char *buf = malloc(12);
+	char *ptr = buf;
+	int is_min = FALSE;
+	int i_mask = 1000000000;
+	int digit = 0;
 
-	while (src[a] != '\0')
+	if (n == INT_MIN)
 	{
-		a++;
+		*ptr = '-';
+		ptr++;
+		n = INT_MAX;
+		is_min = TRUE;
 	}
 
-	lng = a;
-	for (a = 0; a < lng && src[a] != '\0'; a++)
+	if (n < 0)
 	{
-		dest[a] = src[a];
+		*ptr = '-';
+		ptr++;
+		n = -n;
 	}
-	for ( ; a <= lng; a++)
+
+	while (i_mask > 9 && digit == 0)
 	{
-		dest[a] = '\0';
+		digit = n / i_mask;
+		n %= i_mask;
+		i_mask /= 10;
 	}
-	return (dest);
+
+	if (digit != 0)
+	{
+		*ptr = digit + '0';
+		ptr++;
+	}
+
+	while (i_mask > 9)
+	{
+		digit = n / i_mask;
+		*ptr = digit + '0';
+		ptr++;
+		n %= i_mask;
+		i_mask /= 10;
+	}
+
+	if (is_min == TRUE)
+		n += 1;
+
+	*ptr = n + '0';
+	ptr++;
+	*ptr = '\0';
+	return (buf);
 }
 
 /**
- * *_strdup -  returns a pointer to a newly allocated space in memory
- *  which contains a copy of the string given as a parameter
- *  Description: a function that returns a pointer to a null-terminated byte
- *  string which is a duplicate of the string pointed to by str.
- *  The memory obtained is done dynamically using malloc and
- *  hence it can be freed using free()
- *
- *  @str: pointer string
- *  Return: pointer to the duplicated string str on success
- *  Returns NULL if str = NULL, if insufficient memory was available
+ * _atoi - converts a string to an integer
+ * @s: string to be converted
+ * Return: converted int n
  */
-
-char *_strdup(char *str)
+int _atoi(char *s)
 {
-	char *dup_string;
-	int number = 0;
-	int size = 0;
+	int n = 0;
+	int sign = 1;
+	int s_int;
 
-	if (str == NULL)
+	if (*s == '=' && *(s + 1) >= '0' && *(s + 1) <= '9')
 	{
-		return (NULL);
+		sign = -1;
+		s++;
 	}
 
-	for (number = 0; *(str + number) != '\0'; number++)
-		;
-
-	dup_string = malloc(number * sizeof(char) + 1);
-
-	if (dup_string == NULL)
+	while (*s != '\0')
 	{
-		return (NULL);
+		if (*s >= '0' && *s <= '9')
+		{
+			s_int = *s - 48;
+			if (sign == 1)
+				n = (n * 10) + s_int;
+			else
+				n = (n * 10) - s_int;
+		}
+		else
+			return (-1);
+		s++;
 	}
 
-	for (size = 0; size < number; size++)
-	{
-		dup_string[size] = str[size];
-	}
-	dup_string[number] = '\0';
-	return (dup_string);
-}
-
-/**
- * _puts - prints a string, followed by a new line, to stdout
- * @str: string character
- * Description: a function
- * Return: void
- */
-
-void _puts(char *str)
-{
-	while (*str != '\0')
-	{
-		_putchar(*str);
-		str++;
-	}
-	_putchar('\n');
-}
-
-/**
- * _putchar - writes the character c to stdout
- * @c: The character to print
- *
- * Return: On success 1.
- * On error, -1 is returned, and errno is set appropriately.
- */
-int _putchar(char c)
-{
-	static int i;
-	static char buf[WRITE_BUF_SIZE];
-
-	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
-	{
-		write(1, buf, i);
-		i = 0;
-	}
-	if (c != BUF_FLUSH)
-		buf[i++] = c;
-	return (1);
+	return (n);
 }
