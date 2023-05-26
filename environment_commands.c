@@ -1,5 +1,7 @@
 #include "shell.h"
 
+int status;
+
 /**
  * _setEnvironmentVariable - Set an environment variable
  * @name: The name of the environment variable

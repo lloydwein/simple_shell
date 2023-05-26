@@ -1,5 +1,10 @@
 #include "shell.h"
 
+int status = 0;
+
+int line_num = 1;
+
+char *shell_name = NULL;
 /**
  * main - entry point of terminal
  * @ac: args count
