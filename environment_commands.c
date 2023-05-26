@@ -30,7 +30,7 @@ int _setEnvironmentVariable(const char *name, const char *value)
 
 	buffer = str_concat((char *)name, "=");
 
-	elementPtr = get_array_element(environ, buffer);
+	elementPtr = findArrayElement(environ, buffer);
 
 	bufferWithValue = str_concat(buffer, (char *)value);
 	free(buffer);
@@ -120,7 +120,7 @@ int change_directory(char *directory_name)
 
 	if (directory_name == NULL)
 	{
-		home_dir = get_array_element(environ, "HOME=");
+		home_dir = findArrayElement(environ, "HOME=");
 		if (home_dir == NULL)
 		{
 			status = 2;
@@ -137,7 +137,7 @@ int change_directory(char *directory_name)
 	}
 	else if (str_compare("-", directory_name, MATCH) == TRUE)
 	{
-		prev_dir = get_array_element(environ, "OLDPWD=");
+		prev_dir = findArrayElement(environ, "OLDPWD=");
 		if (prev_dir == NULL)
 		{
 			status = 2;
@@ -189,15 +189,15 @@ int handle_alias_command(char **args, int to_free)
 	int is_error_free = TRUE;
 
 	if (to_free == TRUE)
-		return (freeAliasList(head.next));
+		return (deallocateAliases(head.next));
 
 	if (str_compare("alias", *args, MATCH) != TRUE)
-		return (checkIfAlias(args, head.next));
+		return (isAliasCommand(args, head.next));
 
 	args++;
 
 	if (*args == NULL)
-		return (printAliases(head.next));
+		return (printAliasValue(head.next));
 
 	while (*args != NULL)
 	{
