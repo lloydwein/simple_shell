@@ -1,11 +1,11 @@
 #include "shell.h"
 
 /**
- * execute_commands - Executes commands based on logical operators.
+ * command_manager - Executes commands based on logical operators.
  * @args: the command aruments
  * Return: the status of the command execution
  */
-int execute_commands(char **args)
+int command_manager(char **args)
 {
 	char **args_ptr = args;
 	int prev_eval = NEITHER;
@@ -74,19 +74,19 @@ int execute_builtins(char **args)
 			break;
 		}
 		if (str_compare("~", *ptr, MATCH) == TRUE &&
-				get_array_element(environ, "HOME=") != NULL)
+				findArrayElement(environ, "HOME=") != NULL)
 		{
-			*ptr = _strdup(get_array_element(environ, "HOME=")
+			*ptr = _strdup(findArrayElement(environ, "HOME=")
 					+ 5);
 			continue;
 		}
 		if (str_compare("~/", *ptr, PREFIX) == TRUE &&
-				get_array_element(environ, "HOME=") != NULL)
+				findArrayElement(environ, "HOME=") != NULL)
 		{
-			*ptr = str_concat(get_array_element(environ, "HOME=")
+			*ptr = str_concat(findArrayElement(environ, "HOME=")
 					+ 5, *ptr + 1);
 		}
-		*ptr = check_for_vars(*ptr);
+		*ptr = replace_vars(*ptr);
 
 		ptr++;
 	}
@@ -195,8 +195,8 @@ char *check_command(char **args)
 	if (access(*args, X_OK) == 0)
 		return (_strdup(*args));
 
-	if (get_array_element(environ, "PATH=") != NULL)
-		path_str = _strdup(get_array_element(environ, "PATH=") + 5);
+	if (findArrayElement(environ, "PATH=") != NULL)
+		path_str = _strdup(findArrayElement(environ, "PATH=") + 5);
 
 	path_ptr = path_str;
 
@@ -233,7 +233,7 @@ char *check_command(char **args)
 		}
 	}
 	if (path_str != NULL)
-		path_var = make_array(path_str, ':', NULL);
+		path_var = splitString(path_str, ':', NULL);
 
 	path_var_ptr = path_var;
 
@@ -278,7 +278,7 @@ int execute_command(char **args)
 	char *buf_ptr = *args;
 	char *command_name;
 	pid_t pid;
-	int what_do = built_ins(args);
+	int what_do = execute_builtins(args);
 
 	if (what_do == DO_EXECVE)
 	{
