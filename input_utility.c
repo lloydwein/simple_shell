@@ -1,10 +1,10 @@
 #include "shell.h"
 
 int status;
-
 int line_num;
-
 char *shell_name;
+
+extern char **environ;
 
 /**
  * sanitize_input - Sanitizes the input string by replacing newline and tab

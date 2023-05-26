@@ -1,5 +1,10 @@
 #include "shell.h"
 
+int status;
+char *shell_name;
+
+extern char **environ;
+
 /**
  * command_manager - Executes commands based on logical operators.
  * @args: the command aruments

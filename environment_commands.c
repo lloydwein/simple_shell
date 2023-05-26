@@ -2,6 +2,8 @@
 
 int status;
 
+extern char **environ;
+
 /**
  * _setEnvironmentVariable - Set an environment variable
  * @name: The name of the environment variable

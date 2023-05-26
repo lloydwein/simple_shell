@@ -44,6 +44,7 @@ char **splitString(char *stringToSplit, char delimiter, char **nextSubstring)
 	char *stringPtr = stringToSplit;
 	unsigned int numSubstrings = 2;
 	char **substringArray = NULL;
+	unsigned int x;
 
 	while (*stringPtr != '\0')
 	{
@@ -60,7 +61,7 @@ char **splitString(char *stringToSplit, char delimiter, char **nextSubstring)
 
 	substringArray[0] = stringToSplit;
 	stringPtr = stringToSplit;
-	unsigned int index = 1;
+	x = 1;
 
 	while (*stringPtr != '\0')
 	{
@@ -70,7 +71,7 @@ char **splitString(char *stringToSplit, char delimiter, char **nextSubstring)
 			stringPtr++;
 			if (*stringPtr == ';')
 			{
-				substringArray[index] = NULL;
+				substringArray[x] = NULL;
 				if (*(stringPtr + 1) != '\0'
 						&& *(stringPtr + 2) != '\0')
 					*nextSubstring = stringPtr + 2;
@@ -78,13 +79,13 @@ char **splitString(char *stringToSplit, char delimiter, char **nextSubstring)
 			}
 			if (*stringPtr != '\0')
 			{
-				substringArray[index] = stringPtr;
-				index++;
+				substringArray[x] = stringPtr;
+				x++;
 			}
 		}
 		stringPtr++;
 	}
-	substringArray[index] = NULL;
+	substringArray[x] = NULL;
 	return (substringArray);
 }
 

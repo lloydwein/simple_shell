@@ -57,12 +57,12 @@ char *_strcpy(char *dest, char *src)
  *  The memory obtained is done dynamically using malloc and
  *  hence it can be freed using free()
  *
- *  @str: pointer string
+ *  @src: pointer string
  *  Return: pointer to the duplicated string str on success
  *  Returns NULL if str = NULL, if insufficient memory was available
  */
 
-char *_strdup(char *str)
+char *_strdup(char *src)
 {
 	int len = _strlen(src);
 	char *dest = malloc(len + 1);
