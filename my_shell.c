@@ -18,7 +18,7 @@ int main(__attribute__((unused))int ac, char **av)
 	char **args = NULL;
 
 	shell_name = _strdup(*av);
-	environ = copyStringArray(environ, list_len(environ, NULL));
+	environ = copyStringArray(environ, countListEntries(environ, NULL));
 	signal(SIGINT, SIG_IGN);
 	buf = malloc(1);
 	if (buf == NULL)
