@@ -35,7 +35,8 @@ int command_manager(char **args)
 		if (next_op == 'c')
 			break;
 
-		prev_eval = and_or(args, prev_op, prev_eval);
+		prev_eval =
+			perform_logical_evaluation(args, prev_op, prev_eval);
 		if (prev_eval == FALSE)
 			no_err = FALSE;
 		prev_op = next_op;
