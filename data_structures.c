@@ -20,6 +20,36 @@ int _strlen(char *s)
 }
 
 /**
+ * *_strcpy - copies the string pointed to by src, including the terminating
+ * null byte (\0), to the buffer pointed to by dest
+ * @src: string pointer
+ * @dest: array
+ * Description: a funcyion
+ * Return: the pointer to dest
+ */
+char *_strcpy(char *dest, char *src)
+{
+	int a = 0;
+	int lng = 0;
+
+	while (src[a] != '\0')
+	{
+		a++;
+	}
+
+	lng = a;
+	for (a = 0; a < lng && src[a] != '\0'; a++)
+	{
+		dest[a] = src[a];
+	}
+	for ( ; a <= lng; a++)
+	{
+		dest[a] = '\0';
+	}
+	return (dest);
+}
+
+/**
  * *_strdup -  returns a pointer to a newly allocated space in memory
  *  which contains a copy of the string given as a parameter
  *  Description: a function that returns a pointer to a null-terminated byte
