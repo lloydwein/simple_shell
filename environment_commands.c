@@ -197,7 +197,7 @@ int handle_alias_command(char **args, int to_free)
 	args++;
 
 	if (*args == NULL)
-		return (printAliasValue(head.next));
+		return (displayAliases(head.next));
 
 	while (*args != NULL)
 	{
